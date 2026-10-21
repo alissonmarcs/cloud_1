@@ -1,0 +1,40 @@
+---
+
+- name: Run using a project directory
+  hosts: debian
+  gather_facts: false
+  tasks:
+
+    - name: Copy compose.yaml to remote server
+      ansible.builtin.copy:
+        src: compose.yaml
+        dest: /home/vagrant/cloud_1/
+      tags: copy_compose.yaml
+
+    - name: Start wordpress and db compose services
+      community.docker.docker_compose_v2:
+        services:
+          - wordpress
+          - db
+        state: present
+        project_src: /home/vagrant/cloud_1/ 
+        files: 
+          - compose.yaml
+
+    - name: Check if wordpress are installed
+      become: true
+      become_user: root
+      ansible.builtin.stat:
+        path: /var/lib/docker/volumes/cloud_1_db/_data/exampledb/wp_users.frm
+      register: pasta_info
+
+    - name: Use wp-cli to install wordpress
+      when: not pasta_info.stat.exists
+      community.docker.docker_compose_v2_run:
+        project_src: /home/vagrant/cloud_1/ 
+        files:
+          - compose.yaml
+        service: wp_cli
+        cleanup: true
+        command: wp core install --url=192.168.56.110:8080  --title="wp_cli" --admin_user=wp_cli --admin_password=wp_cli --admin_email=teste@gmail.com
+      tags: wp_cli

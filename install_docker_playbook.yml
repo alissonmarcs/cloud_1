@@ -1,0 +1,10 @@
+---
+- name: Install Docker via Community Role
+  hosts: debian
+  become: yes
+  vars:
+    docker_users:
+      - vagrant  # Replaces 'ubuntu' with your remote system user to run Docker without sudo
+  roles:
+    - geerlingguy.docker
+

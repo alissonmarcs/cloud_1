@@ -1,0 +1,5 @@
+[debian]
+192.168.56.110 ansible_connection=ssh ansible_user=vagrant
+
+[local]
+127.0.0.1 ansible_connection=local ansible_user=alisson
