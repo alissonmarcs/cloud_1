@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
     machine.vm.network "private_network", ip: "192.168.56.110", hostname: true
    
     machine.vm.provider :virtualbox do |vb|
-      vb.name = "vde-freiS"
+      vb.name = "cloud-1"
     end
   end
 end
