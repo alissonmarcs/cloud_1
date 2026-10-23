@@ -3,13 +3,35 @@
 - name: Run using a project directory
   hosts: debian
   gather_facts: false
+  vars:
+    project_folder_remote_host: /home/vagrant/cloud_1/
+    db_host: db
+    db_name: exampledb
+    db_user: exampleuser
+    db_password: examplepass
+    db_root_password: example_root_password
+    wordpress_url: 192.168.56.110   
+    wordpress_admin_user: marvin
+    wordpress_admin_password: 123a123b
+    wordpress_email: someone@gmail.com
+    wordpress_title: 42 blog
   tasks:
 
-    - name: Copy compose.yaml to remote server
-      ansible.builtin.copy:
-        src: compose.yaml
-        dest: /home/vagrant/cloud_1/
-      tags: copy_compose.yaml
+    - name: Create project folder in remote server
+      ansible.builtin.file:
+        path: "{{ project_folder_remote_host }}"
+        state: directory
+        mode: '0600'
+        owner: vagrant
+        group: vagrant
+      tags: create_folder_remote_server
+
+    - name: Copy compose.yml to remote server
+      ansible.builtin.template:
+        src: compose.yml.j2
+        dest: "{{ project_folder_remote_host }}/compose.yml"
+        mode: '0600'
+      tags: copy_compose.yml.j2_remote_server
 
     - name: Start wordpress and db compose services
       community.docker.docker_compose_v2:
@@ -17,11 +39,11 @@
           - wordpress
           - db
         state: present
-        project_src: /home/vagrant/cloud_1/ 
+        project_src: "{{ project_folder_remote_host }}"
         files: 
-          - compose.yaml
+          - compose.yml
 
-    - name: Check if wordpress are installed
+    - name: Check if wordpress are installed and store result in pasta_info
       become: true
       become_user: root
       ansible.builtin.stat:
@@ -31,10 +53,10 @@
     - name: Use wp-cli to install wordpress
       when: not pasta_info.stat.exists
       community.docker.docker_compose_v2_run:
-        project_src: /home/vagrant/cloud_1/ 
+        project_src: "{{ project_folder_remote_host }}"
         files:
-          - compose.yaml
+          - compose.yml
         service: wp_cli
         cleanup: true
-        command: wp core install --url=192.168.56.110:8080  --title="wp_cli" --admin_user=wp_cli --admin_password=wp_cli --admin_email=teste@gmail.com
+        command: wp core install --url="{{ wordpress_url }}"  --title="{{ wordpress_title }}" --admin_user="{{ wordpress_admin_user }}" --admin_password="{{ wordpress_admin_password }}" --admin_email="{{ wordpress_email }}"
       tags: wp_cli

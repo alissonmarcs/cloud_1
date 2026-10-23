@@ -1,0 +1,54 @@
+x-common-environment-variables: &wordpress_variables
+      WORDPRESS_DB_HOST: {{ db_host }}
+      WORDPRESS_DB_NAME: {{ db_name }}
+      WORDPRESS_DB_USER: {{ db_user }}
+      WORDPRESS_DB_PASSWORD: {{ db_password }}
+      WORDPRESS_DEBUG: 1
+
+services:
+
+  db:
+    image: mariadb:13.0.2
+    restart: always
+    environment:
+      MARIADB_DATABASE: {{ db_name }}
+      MARIADB_USER: {{ db_user }}
+      MARIADB_PASSWORD: {{ db_password }}
+      MARIADB_ROOT_PASSWORD: {{ db_root_password }}
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  wordpress:
+    image: wordpress:7.1
+    restart: always
+    ports:
+      - 192.168.56.110:80:80
+    environment:
+      <<: [*wordpress_variables]
+    volumes:
+      - wordpress:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+
+  wp_cli:
+    image: wordpress:cli-php8.5
+    environment:
+      <<: [*wordpress_variables]
+      NOME_MAE: neide
+    volumes:
+      - wordpress:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  wordpress:
+  db:
+    

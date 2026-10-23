@@ -4,8 +4,9 @@ services:
     image: wordpress:7.1
     restart: always
     ports:
-      - 8080:80
+      - 192.168.56.110:80:80
     environment:
+      USER_NAME
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: exampleuser
       WORDPRESS_DB_PASSWORD: examplepass
