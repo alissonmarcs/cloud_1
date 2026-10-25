@@ -1,0 +1,46 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Create project folder in remote server
+  ansible.builtin.file:
+    path: "{{ project_folder_remote_host }}"
+    state: directory
+    mode: '0700'
+    owner: vagrant
+    group: vagrant
+  tags: create_folder_remote_server
+
+- name: Copy compose.yml to remote server
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ project_folder_remote_host }}compose.yml"
+    mode: '0700'
+  tags: copy_compose.yml.j2_remote_server
+
+- name: Start wordpress and db compose services
+  community.docker.docker_compose_v2:
+    services:
+      - wordpress
+      - db
+    state: present
+    project_src: "{{ project_folder_remote_host }}"
+    files:
+      - compose.yml
+
+- name: Check if wordpress are installed and store result in pasta_info
+  become: true
+  become_user: root
+  ansible.builtin.stat:
+    path: /var/lib/docker/volumes/cloud_1_db/_data/exampledb/wp_users.frm
+  register: pasta_info
+
+- name: Use wp-cli to install wordpress
+  when: not pasta_info.stat.exists
+  community.docker.docker_compose_v2_run:
+    project_src: "{{ project_folder_remote_host }}"
+    files:
+      - compose.yml
+    service: wp_cli
+    cleanup: true
+    command: wp core install --url="{{ wordpress_url }}"  --title="{{ wordpress_title }}" --admin_user="{{ wordpress_admin_user }}" --admin_password="{{ wordpress_admin_password }}" --admin_email="{{ wordpress_email }}"
+  tags: wp_cli
+
