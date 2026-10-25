@@ -8,7 +8,7 @@ Dependencies: Vagrant and VirtualBox
 vagrant up
 ```
 
-The VM has a user named `vagrant` with the password `vagrant`. Ansible will use these credentials to establish an SSH connection.
+The VM has a `vagrant` user. Vagrant forwards its SSH service to `127.0.0.1:2222` and creates a private key in `.vagrant/`. The Ansible inventory uses this endpoint. This works from Windows and WSL without direct access to the VirtualBox-only address.
 
 ### Install Ansible on Your Host Machine (Control Node)
 
@@ -25,21 +25,17 @@ Also, install the community collections and roles required for Ansible to work w
 (.venv) $ ansible-galaxy role install geerlingguy.docker
 ```
 
-### Install Docker on the VM Using Ansible
+### Run the Playbook from WSL
 
 ```bash
-(.venv) $ ansible-playbook -i inventory.init install_docker_playbook.yml --ask-pass
+source .venv/bin/activate
+cd ansible
+ansible-playbook site.yml
 ```
 
-- `-i inventory.init` tells Ansible which IP address and username to use for the SSH connection.
-- `--ask-pass` prompts you for the password used to establish the SSH connection.
-- `install_docker_playbook.yml` defines the operations required to install Docker and specifies the remote hosts on which to execute them, as listed in `inventory.init`.
-
-### Start the WordPress Containers Using Ansible
-
-```bash
-(.venv) $ ansible-playbook -i inventory.init start_wordpress_playbook.yml --ask-pass
-```
+- `ansible.cfg` loads `inventory.init` automatically.
+- The inventory connects through Vagrant's forwarded SSH endpoint and private key.
+- The playbook needs no `--ask-pass` option.
 
 WordPress is accessible from your host machine at `http://192.168.56.110:8080`.
 
