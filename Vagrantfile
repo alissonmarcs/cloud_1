@@ -10,6 +10,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", inline: "swapoff -a; sed -i '/\sswap\s/s/^/#/' /etc/fstab;"
 
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
   config.vm.define "cloud-1" do |machine|
     machine.vm.hostname = "cloud-1"
     machine.vm.network "private_network", ip: "192.168.56.110", hostname: true
