@@ -3,11 +3,9 @@
 - name: Run using a project directory
   hosts: debian
   gather_facts: true
+  become: true
+  become_method: sudo
 
   roles:
-    - role: geerlingguy.docker
-      become: true
-      become_user: root
-      become_method: sudo
-
+    - geerlingguy.docker
     - start_wordpress
