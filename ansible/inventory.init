@@ -1,2 +1,2 @@
 [debian]
-192.168.56.110 ansible_connection=ssh ansible_user=vagrant
+18.191.57.47 ansible_connection=ssh ansible_user=ubuntu

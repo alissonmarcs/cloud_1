@@ -5,8 +5,8 @@
     path: "{{ project_folder_remote_host }}"
     state: directory
     mode: '0700'
-    owner: vagrant
-    group: vagrant
+    owner: ubuntu
+    group: ubuntu
   tags: create_folder_remote_server
 
 - name: Copy compose.yml to remote server

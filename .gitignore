@@ -2,3 +2,6 @@ venv/
 .venv/
 .vagrant/
 *.swp
+*.tfstate.backup
+*.tfstate
+.terraform/
