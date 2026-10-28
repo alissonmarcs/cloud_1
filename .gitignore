@@ -5,3 +5,5 @@ venv/
 *.tfstate.backup
 *.tfstate
 .terraform/
+aws_key
+aws_key.pub
