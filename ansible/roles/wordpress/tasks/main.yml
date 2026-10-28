@@ -5,15 +5,17 @@
     path: "{{ project_folder_remote_host }}"
     state: directory
     mode: '0700'
-    owner: ubuntu
-    group: ubuntu
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
   tags: create_folder_remote_server
 
 - name: Copy compose.yml to remote server
   ansible.builtin.template:
     src: compose.yml.j2
     dest: "{{ project_folder_remote_host }}compose.yml"
-    mode: '0700'
+    mode: '0600'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
   tags: copy_compose.yml.j2_remote_server
 
 - name: Start wordpress and db compose services

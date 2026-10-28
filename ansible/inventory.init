@@ -1,3 +1,2 @@
 [debian]
-18.227.137.45 ansible_connection=ssh ansible_user=ubuntu wordpress_url=18.227.137.45
-18.226.29.72 ansible_connection=ssh ansible_user=ubuntu wordpress_url=18.226.29.72
+192.168.56.110 ansible_connection=ssh ansible_user=vagrant wordpress_url="{{ ansible_host }}"
