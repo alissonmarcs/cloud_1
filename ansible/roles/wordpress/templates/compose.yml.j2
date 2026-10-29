@@ -6,6 +6,15 @@ x-common-environment-variables: &wordpress_variables
       WORDPRESS_DEBUG: 1
 
 services:
+  phpmyadmin:
+    image: phpmyadmin:5.2.3-apache
+    restart: always
+    ports:
+     - 0.0.0.0:4242:4242
+    environment:
+      APACHE_PORT: 4242
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: {{ db_root_password }}
 
   db:
     image: mariadb:13.0.2
