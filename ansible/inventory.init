@@ -1,2 +1,2 @@
 [debian]
-192.168.56.110 ansible_connection=ssh ansible_user=vagrant wordpress_url="{{ ansible_host }}"
+3.139.107.180 ansible_connection=ssh ansible_user=ubuntu wordpress_url=cloudone42.duckdns.org

@@ -8,4 +8,5 @@
 
   roles:
     - ufw
+    - {role: duckdns, tags: get_public_ip}
     - wordpress

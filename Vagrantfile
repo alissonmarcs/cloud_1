@@ -1,8 +1,8 @@
 Vagrant.configure("2") do |config|
   
   config.vm.provider :virtualbox do |vb|
-    vb.memory = 8048
-    vb.cpus = 6
+    vb.memory = 1048
+    vb.cpus = 2
   end
   
   config.vm.box = "bento/debian-13.1"
@@ -18,6 +18,9 @@ Vagrant.configure("2") do |config|
    
     machine.vm.provider :virtualbox do |vb|
       vb.name = "cloud-1"
+      target_folder = "/sgoinfre/almarcos/debian_vagrant/"
+      vb.customize ["setproperty", "machinefolder", target_folder]
     end
+
   end
 end
