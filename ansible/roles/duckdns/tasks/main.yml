@@ -1,0 +1,17 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Get Public IP
+  ansible.builtin.uri:
+    url: http://169.254.169.254/2016-04-19/meta-data/public-ipv4
+    return_content: true
+  register: http_response
+  tags: role_get_public_ip
+
+- name: Exibir o valor de uma variável específica
+  ansible.builtin.debug:
+    var: http_response
+
+- name: Update domain with new public IP
+  ansible.builtin.uri:
+    url: "https://www.duckdns.org/update?domains={{ wordpress_url }}&token={{ duck_dns_token }}&ip={{ http_response.content | trim }}&verbose=true"
+  tags: update_domain
