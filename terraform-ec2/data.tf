@@ -12,3 +12,12 @@ data "aws_ami" "ubuntu_22_04_x86" {
     values = ["hvm"]
   }
 }
+
+data "aws_subnet" "selected" {
+  availability_zone = "us-east-2a"
+}
+
+data "aws_vpc" "default" {
+  default = true
+}
+
