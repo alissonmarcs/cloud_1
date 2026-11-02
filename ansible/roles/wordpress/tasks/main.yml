@@ -21,7 +21,8 @@
 - name: Start wordpress and db compose services
   community.docker.docker_compose_v2:
     services:
-      - wordpress
+      - wordpress_php_fpm
+      - nginx
       - db
     state: present
     project_src: "{{ project_folder_remote_host }}"

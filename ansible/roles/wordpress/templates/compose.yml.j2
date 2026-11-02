@@ -6,6 +6,18 @@ x-common-environment-variables: &wordpress_variables
       WORDPRESS_DEBUG: 1
 
 services:
+  nginx:
+    image: nginx:1.30.6-alpine3.24
+    restart: always
+    ports:
+     - 0.0.0.0:443:443
+    volumes:
+     - wordpress:/var/www/html
+     - /var/certificate.key:/var/certificate.key
+     - /var/certificate.pem:/var/certificate.pem
+     - /var/wordpress_nginx.conf:/etc/nginx/conf.d/default.conf
+
+
   phpmyadmin:
     image: phpmyadmin:5.2.3-apache
     restart: always
@@ -32,6 +44,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+
+  wordpress_php_fpm:
+    image: wordpress:php8.4-fpm-alpine
+    restart: always
+    environment:
+      <<: [*wordpress_variables]
+    volumes:
+      - wordpress:/var/www/html
+      - /var/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
+    depends_on:
+      db:
+        condition: service_healthy
+
 
   wordpress:
     image: wordpress:7.1

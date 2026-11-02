@@ -7,6 +7,7 @@
   become_method: sudo
 
   roles:
-    - ufw
-    - {role: duckdns, tags: get_public_ip}
+    # - ufw
+      # - {role: duckdns, tags: get_public_ip}
     - wordpress
+    - {role: nginx, tags: ssl}
