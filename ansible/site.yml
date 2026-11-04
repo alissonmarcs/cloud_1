@@ -6,8 +6,14 @@
   become: true
   become_method: sudo
 
+  vars:
+    project_folder_remote_host: "/home/{{ ansible_user }}/cloud_1/"
+    docker_users: 
+      - "{{ ansible_user }}"
+
+
   roles:
-    # - ufw
-      # - {role: duckdns, tags: get_public_ip}
+    - {role: geerlingguy.docker, tags: install_docker }
     - wordpress
-    - {role: nginx, tags: ssl}
+    - ufw
+    - {role: duckdns, tags: get_public_ip}
