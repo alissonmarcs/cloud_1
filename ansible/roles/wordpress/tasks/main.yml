@@ -1,5 +1,6 @@
 #SPDX-License-Identifier: MIT-0
 ---
+
 - name: Create project folder in remote server
   ansible.builtin.file:
     path: "{{ project_folder_remote_host }}"
@@ -7,16 +8,52 @@
     mode: '0700'
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-  tags: create_folder_remote_server
 
-- name: Copy compose.yml to remote server
+- name: Copy docker-compose.yml to remote server
   ansible.builtin.template:
-    src: compose.yml.j2
-    dest: "{{ project_folder_remote_host }}compose.yml"
+    src: docker-compose.yml.j2
+    dest: "{{ project_folder_remote_host }}docker-compose.yml"
     mode: '0600'
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-  tags: copy_compose.yml.j2_remote_server
+  tags: docker-compose.yml
+
+- name: Install cryptography package
+  tags: install_cryptography
+  ansible.builtin.apt:
+    update_cache: yes
+    state: present
+    name: python3-cryptography
+
+- name: Create private key (RSA, 4096 bits)
+  community.crypto.openssl_privatekey:
+    path: "{{ project_folder_remote_host }}certificate.key"
+
+- name: Create certificate signing request (CSR) for self-signed certificate
+  community.crypto.openssl_csr:
+    privatekey_path: "{{ project_folder_remote_host }}certificate.key"
+    path: "{{ project_folder_remote_host }}cloudone42.csr"
+    common_name: cloudone42.duckdns.org
+    organization_name: Ansible, Inc.
+    subject_alt_name:
+      - "DNS:cloudone42.duckdns.org"
+
+- name: Create self-signed certificate from CSR
+  community.crypto.x509_certificate:
+    path: "{{ project_folder_remote_host }}certificate.pem"
+    csr_path: "{{ project_folder_remote_host }}cloudone42.csr"
+    privatekey_path: "{{ project_folder_remote_host }}certificate.key"
+    provider: selfsigned
+
+- name: Copy containers_confgs
+  ansible.builtin.copy:
+    src: containers_configs
+    dest: "{{ project_folder_remote_host }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+    directory_mode: '0700'
+  tags: copy_containers_configs
 
 - name: Start wordpress and db compose services
   community.docker.docker_compose_v2:
@@ -27,7 +64,7 @@
     state: present
     project_src: "{{ project_folder_remote_host }}"
     files:
-      - compose.yml
+      - docker-compose.yml
 
 - name: Check if wordpress are installed and store result in pasta_info
   become: true
@@ -41,7 +78,7 @@
   community.docker.docker_compose_v2_run:
     project_src: "{{ project_folder_remote_host }}"
     files:
-      - compose.yml
+      - docker-compose.yml
     service: wp_cli
     cleanup: true
     command: wp core install --url="{{ wordpress_url }}"  --title="{{ wordpress_title }}" --admin_user="{{ wordpress_admin_user }}" --admin_password="{{ wordpress_admin_password }}" --admin_email="{{ wordpress_email }}"
