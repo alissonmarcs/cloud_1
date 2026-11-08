@@ -1,68 +1,38 @@
-## How to Run
+# How to Run
 
-Dependencies: Vagrant and VirtualBox
+In `terraform.tfvars`, set the `full_path_ssh_public_key` variable.
 
-### Start the Debian VM
-
-```bash
-vagrant up
+```sh
+cd terraform-ec2
+aws login
+aws sts get-caller-identity
+export AWS_PROFILE=default
+terraform init
+terraform plan
+terraform apply
 ```
 
-The VM has a `vagrant` user. Vagrant forwards its SSH service to `127.0.0.1:2222` and creates a private key in `.vagrant/`. The Ansible inventory uses this endpoint. This works from Windows and WSL without direct access to the VirtualBox-only address.
+`terraform apply` will output two public IP addresses. Add these IPs to `ansible/inventory.init`.
 
-### Install Ansible on Your Host Machine (Control Node)
+Before running Ansible, add the following line to your `~/.ssh/config`:
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install ansible
+```sshconfig
+StrictHostKeyChecking no
 ```
 
-Also, install the community collections and roles required for Ansible to work with Docker:
+When connecting to a server for the first time, SSH normally prompts you to add the server's public host key to `~/.ssh/known_hosts`. This prompt causes Ansible to fail because it cannot be answered interactively. The configuration above disables this check.
 
-```bash
-(.venv) $ ansible-galaxy collection install community.docker
-(.venv) $ ansible-galaxy role install geerlingguy.docker
-```
-
-### Run the Playbook from WSL
-
-```bash
-source .venv/bin/activate
+```sh
 cd ansible
-ansible-playbook site.yml
+source .venv/bin/activate
+ansible-playbook site.yml --ask-become-pass --ask-vault-pass
 ```
 
-- `ansible.cfg` loads `inventory.init` automatically.
-- The inventory connects through Vagrant's forwarded SSH endpoint and private key.
-- The playbook needs no `--ask-pass` option.
+Both servers will be accessible at:
 
-WordPress is accessible from your host machine at `http://192.168.56.110:8080`.
+- https://42blog.duckdns.org
+- https://43blog.duckdns.org
 
-To access the WordPress admin panel, open http://192.168.56.110:8080/wp-admin/ in your browser and use `wp_cli` as both the username and password.
+phpMyAdmin is available at the `/phpmyadmin` path on both servers.
 
-### Vagrant VM Lifecycle Commands
-
-Start the VM:
-
-```bash
-vagrant up
-```
-
-Open a Bash shell in the VM:
-
-```bash
-vagrant ssh
-```
-
-Stop the VM:
-
-```bash
-vagrant halt
-```
-
-Delete the VM:
-
-```bash
-vagrant destroy -f
-```
+The login credentials for WordPress and phpMyAdmin are stored in `roles/wordpress/vars/main.yml`.
