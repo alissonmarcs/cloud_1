@@ -1,12 +1,24 @@
+variable "full_path_ssh_public_key" {
+ type = string
+}
+
+variable "instances" {
+
+ type = map(string)
+
+}
+
 resource "aws_key_pair" "deployer" {
   key_name   = "alisson_public_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDbeYw4ua8rdxBnohC1nsW+qMYmVpSZq2OvZU3la91kRgyHxYS2dV9mvzeN665OAu65XkuZtyrU3N7JSL/hZp65hIailSlNHZAMhq+zrBruKgiqgQW/Cx1a9QhPcN+mmGxFyBZ+yfhBYjRfdRt1CMSK6S1U77Ufh3guCoGxFsyJuSVOE5WxGITpLsvX+dynNekJzQpvpKoGM7n+O/VFj1xuIf4uuel7JQbE/gDXVUoVSHT+5csEsHmFFGwj76eLjuRlYpfanYlPcSn/+re09aFsugXGMwHv/oU3bxflxjtzVOQO+m05/YNHJiOnLfUVfDbZsgiu5coe+fTkyTQMoACVGFIg3OA/e5Y8DIdyLcx0IdB8zRQ3YVf2aZ5wJyqOIM0Av106oXhV+n+Sr9oXHD4gMtvg8HPZK9kIyEnQlgILobJ+8jwzwmpAzIcYEXXwvaFEIe5YXPH0J60qphFnJVd/yr/LFnwrVx718YFqyAhs2sUPsKrgu260l3csH3Ro0gzfZ37G9dyEoroyvHcEbRzI6AdehAVDwANPGHdoD1vc22bIu9Ivo6fzXdlNaS9gimcW/ZP+t1mG/VrDdz7nvG6UNPcWtsCFEXwSpdp2RByjkaw9FFkg+ZVcT7e9ziO/oJsepGkvsdKn8S5tHWag7AcRYluK8PaxFcyZ+nx4zZdMCQ== alissonmarcos249@gmail.com"
+  public_key = file(var.full_path_ssh_public_key)
 }
 
 resource "aws_instance" "ubuntu_server_22_04" {
 
+  for_each = var.instances
+
+  instance_type = each.value
   ami           = data.aws_ami.ubuntu_22_04_x86.id
-  instance_type = "t3.micro"
 
   depends_on = [aws_key_pair.deployer, aws_security_group.allow_tls]
 
@@ -20,7 +32,7 @@ resource "aws_instance" "ubuntu_server_22_04" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "Ubuntu-22.04-x86"
+    Name = each.key
   }
 }
 
@@ -63,7 +75,10 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
 }
 
 output "instance_public_ip" {
-  value       = aws_instance.ubuntu_server_22_04.public_ip
   description = "O endereço IP público da instância EC2"
+  value       = {
+   for key, value in aws_instance.ubuntu_server_22_04 :
+    key => value.public_ip
+  }
 }
 

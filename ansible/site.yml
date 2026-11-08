@@ -14,6 +14,6 @@
 
   roles:
     - {role: geerlingguy.docker, tags: install_docker }
-    - wordpress
+    - {role: wordpress, tags: wordpress}
     - ufw
     - {role: duckdns, tags: get_public_ip}

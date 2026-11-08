@@ -13,20 +13,24 @@ services:
      - 0.0.0.0:443:443
     volumes:
      - wordpress:/var/www/html
+     - php_my_admin:/var/www/php_my_admin
      - ./certificate.key:/var/certificate.key
      - ./certificate.pem:/var/certificate.pem
      - ./containers_configs/wordpress_nginx.conf:/etc/nginx/conf.d/default.conf
 
 
   phpmyadmin:
-    image: phpmyadmin:5.2.3-apache
+    image: phpmyadmin:5.2.3-fpm-alpine
     restart: always
-    ports:
-     - 0.0.0.0:4242:4242
     environment:
-      APACHE_PORT: 4242
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: {{ db_root_password }}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+     - php_my_admin:/var/www/html
+     - ./containers_configs/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
 
   db:
     image: mariadb:13.0.2
@@ -71,4 +75,5 @@ services:
 volumes:
   wordpress:
   db:
+  php_my_admin:
     

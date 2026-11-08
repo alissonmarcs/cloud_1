@@ -61,6 +61,7 @@
       - wordpress_php_fpm
       - nginx
       - db
+      - phpmyadmin
     state: present
     project_src: "{{ project_folder_remote_host }}"
     files:

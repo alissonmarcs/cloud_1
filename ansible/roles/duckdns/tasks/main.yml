@@ -11,7 +11,8 @@
   ansible.builtin.debug:
     var: http_response
 
-- name: Update domain with new public IP
+- name: Update wordpress and phpmyadmin domains with new public IP
   ansible.builtin.uri:
     url: "https://www.duckdns.org/update?domains={{ wordpress_url }}&token={{ duck_dns_token }}&ip={{ http_response.content | trim }}&verbose=true"
   tags: update_domain
+
