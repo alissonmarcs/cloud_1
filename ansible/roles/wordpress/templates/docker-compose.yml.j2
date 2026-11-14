@@ -23,6 +23,7 @@ services:
     image: phpmyadmin:5.2.3-fpm-alpine
     restart: always
     environment:
+      PMA_SSL: 1
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: {{ db_root_password }}
     depends_on:
